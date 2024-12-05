@@ -1,66 +1,56 @@
 #!/usr/bin/env python3
-import numpy as np  
+
+from collections import defaultdict
+
 
 def main():
 
     # read file
-    f = open("day4.txt", "r")
-    #f = open("day4_test.txt", "r")
+    f = open("day5.txt", "r")
+    # f = open("day5_test.txt", "r")
 
-    lines = f.read().splitlines()
-    matrix = np.array([[char for char in line] for line in lines])  
+    lines = f.read()
 
-    # first index is down, second is right
-    directions = [
-        (0, 1),
-        (1, 1),
-        (1, 0),
-        (1, -1),
-        (0, -1),
-        (-1, -1),
-        (-1, 0),
-        (-1, 1),
-    ]
+    orderings, strings = lines.split("\n\n")
 
-    # find the Xs
-    rows, cols = matrix.shape
+    order_dict_less = defaultdict(list)
+    for ordering in orderings.splitlines():
+
+        first, second = ordering.split("|")
+        order_dict_less[first].append(second)
+
     total = 0
+    total2 = 0
+    for string in strings.splitlines():
+        numbers = string.split(",")
 
-    for i in range(rows):
-        for j in range(cols):
+        is_correct = True
+        for i, number in enumerate(numbers):
+            for j, number2 in enumerate(numbers):
 
-            if matrix[i][j] == 'X':
+                if j < i:
+                    if number2 in order_dict_less[number]:
+                        is_correct = False
+                        break
 
-                for direction in directions:
+            if not is_correct:
+                break
 
-                    if 0 <= i + 3*direction[0] < rows and 0 <= j + 3*direction[1] < cols:
+        if is_correct:
+            total += int(numbers[int(len(numbers) / 2)])
 
-                        if matrix[i + direction[0]][j + direction[1]] == 'M' and matrix[i + 2*direction[0]][j + 2*direction[1]] == 'A' and matrix[i + 3*direction[0]][j + 3*direction[1]] == 'S' :
-                            total += 1                
-                            #print(i, j, direction)
+        if not is_correct:
 
+            for i in range(len(numbers) - 1):
+                for j in range(len(numbers) - i - 1):
+                    if numbers[j] in order_dict_less[numbers[j + 1]]:
+                        numbers[j], numbers[j + 1] = numbers[j + 1], numbers[j]
 
-#    print(matrix)
+            total2 += int(numbers[int(len(numbers) / 2)])
+
     print(total)
+    print(total2)
 
-    # find the Xs
-    rows, cols = matrix.shape
-    total = 0
-
-    for i in range(1, rows-1):
-        for j in range(1, cols-1):
-
-            if matrix[i][j] == 'A':
-
-                if (matrix[i - 1][j-1] == 'M' and matrix[i + 1][j+1] == 'S') or (matrix[i - 1][j-1] == 'S' and matrix[i + 1][j+1] == 'M'):
-                    if (matrix[i - 1][j+1] == 'M' and matrix[i + 1][j-1] == 'S') or (matrix[i - 1][j+1] == 'S' and matrix[i + 1][j-1] == 'M'):
-                        total += 1
-
-
-
-
-#    print(matrix)
-    print(total)
 
 if __name__ == "__main__":
     main()
